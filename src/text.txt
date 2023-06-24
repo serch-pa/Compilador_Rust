@@ -1,0 +1,6 @@
+int contador = 12;
+int main(){
+    char letra, caracter='a';
+    int suma = letra+caracter;
+    return 0;
+}
