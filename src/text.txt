@@ -1,13 +1,19 @@
-float amigos, hermanos = 13;
-int estudios;
+int hola;
+float persona, hora = 12;
+char letra = 12;
+int a,b;
 main(){
-    amigos = pow  (157,(hola+1075*(adios/1)));
-    familia=123.14
-    if (hola == 12){
-        extrano=(1241/146*(adios));
-        void = pow(hola,126573.14);
+    hermano, hola =11;
+    hola = (martinez*1);
+    if (hola != sqrt(1)){
+        hola = 1;
+        benito = 1534*pow(1,1);
     } else{
-        extrano = sqrt(135.215*2);
+        amigo,best='b';
+        amigo;}
+    estado =2;
+    if (americo ==1){
+        adios = 'a';
     }
-    ami = sqrt(1756*(151));
+    holaaaa = (12*5-1);
 }

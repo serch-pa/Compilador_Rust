@@ -3,6 +3,62 @@ use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::BufReader;
 
+fn error_dotcomma(
+    buffer: &Vec<TokenVector>,
+    pos: &mut i32, )-> String{
+    return format!("Error in line: {}\n   Missing ';' after {} token",buffer[(*pos-1) as usize].ln, buffer[(*pos-1) as usize].word)
+}
+
+fn error_expression(
+    buffer: &Vec<TokenVector>,
+    pos: &mut i32, )-> String{
+    return format!("Error in line: {}\n   Missing expression after {} token",buffer[(*pos-1) as usize].ln, buffer[(*pos-1) as usize].word)
+}
+
+fn error_id(
+    buffer: &Vec<TokenVector>,
+    pos: &mut i32, )-> String{
+    return format!("Error in line: {}\n   Missing id after {} token",buffer[(*pos-1) as usize].ln, buffer[(*pos-1) as usize].word)
+}
+
+fn error_type(
+    buffer: &Vec<TokenVector>,
+    pos: &mut i32, )-> String{
+    return format!("Error in line: {}\n   Missing type before {} token",buffer[*pos as usize].ln, buffer[*pos as usize].word)
+}
+
+fn error_close_par(
+    buffer: &Vec<TokenVector>,
+    pos: &mut i32, )-> String{
+    return format!("Error in line: {}\n   Missing ')' after {} token",buffer[(*pos-1) as usize].ln, buffer[(*pos-1) as usize].word)
+}
+
+fn error_close_key(
+    buffer: &Vec<TokenVector>,
+    pos: &mut i32, )-> String{
+    return format!("Error in line: {}\n   Missing '}}' after {} token",buffer[(*pos-1) as usize].ln, buffer[(*pos-1) as usize].word)
+}
+
+fn error_main(
+    buffer: &Vec<TokenVector>,
+    pos: &mut i32, )-> String{
+    return format!("Error in line: {}\n   Missing or wrong 'main' statement",buffer[(*pos-1) as usize].ln)}
+
+fn error_if(
+    buffer: &Vec<TokenVector>,
+    pos: &mut i32, )-> String{
+    return format!("Error in line: {}\n   Missing or wrong 'if' statement",buffer[(*pos-1) as usize].ln)}
+
+fn error_exp(
+    buffer: &Vec<TokenVector>,
+    pos: &mut i32, )-> String{
+    return format!("Error in line: {}\n   Missing expression on 'if' statement",buffer[(*pos-1) as usize].ln)}
+
+fn error_else(
+    buffer: &Vec<TokenVector>,
+    pos: &mut i32, )-> String{
+    return format!("Error in line: {}\n   Missing or wrong 'else' statement",buffer[(*pos-1) as usize].ln)}
+
 // struct TokenInTable {
 //     type_token: String,
 //     line: usize,
@@ -200,22 +256,20 @@ fn program(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
         if dec_list(pos,buffer,token,vec_error) == 1{
             if inicio(pos,buffer,token,vec_error) == 1{
                 return 1;
             }
         }
-        return 0
+        1
     }
 
 fn inicio(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
         let mut actual_pos = *pos;
         if read(pos,buffer,token) == 14{ // main
             actual_pos = *pos;
@@ -226,31 +280,29 @@ fn inicio(
                     if read(pos,buffer,token) == 15{  //  {
                         if sentencia(pos,buffer,token,vec_error) == 1{ 
                             actual_pos = *pos;
-                            if read(pos,buffer,token) == 16{  //  }
+                            if buffer[buffer.len()-2].val == '}'.to_string(){  //  }
                                 return 1;
-                            }else{*pos = actual_pos; return 0;}
+                            }else{*pos = actual_pos; vec_error.push(error_close_key(buffer, pos));return 1;}
                         }
-                    }else{*pos = actual_pos; return 0;}
-                }else{*pos = actual_pos; return 0;}
-            }else{*pos = actual_pos; return 0;}
-        }
-        *pos = actual_pos;
-        return 0
+                    }else{*pos = actual_pos;}
+                }else{*pos = actual_pos;}
+            }else{*pos = actual_pos;}
+        }else{*pos = actual_pos;}
+        vec_error.push(error_main(buffer, pos));
+    0
     }
 
 fn sentencia(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
         //println!("buffer: {} line: {}", buffer[*pos as usize].word, buffer[*pos as usize].ln);
         if asig_list(pos,buffer,token,vec_error) == 1{
             if sentencia(pos, buffer, token, vec_error) == 1{
                 return 1;
             }
         }
-        //println!("buffer: {} line: {} ", buffer[*pos as usize].word, buffer[*pos as usize].ln);
         if condicion(pos,buffer,token,vec_error) == 1{
             if sentencia(pos, buffer, token, vec_error) == 1{
                 return 1;
@@ -263,8 +315,7 @@ fn condicion(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
         let mut actual_pos = *pos;
         if read(pos,buffer,token) == 17{  // if
             actual_pos = *pos;
@@ -279,25 +330,36 @@ fn condicion(
                                 actual_pos = *pos;
                                 if read(pos,buffer,token) == 16{  //  }
                                     actual_pos = *pos;
-                                    if read(pos,buffer,token) == 18{  //  else
-                                        actual_pos = *pos;
-                                        if read(pos,buffer,token) == 15{  //  {
-                                            if sentencia(pos,buffer,token,vec_error) == 1{
-                                                actual_pos = *pos;
-                                                if read(pos,buffer,token) == 16{  //  }
-                                                    return 1;
-                                                }else{*pos = actual_pos; return 0;}
-                                            }else{*pos = actual_pos; return 0;}
-                                        }else{*pos = actual_pos; return 0;}
-                                    }else{*pos = actual_pos; return 1;}
-                                }else{*pos = actual_pos; return 0;}
-                            } {return 0;}
-                        } else {*pos = actual_pos; return 0;}
-                    } else {*pos = actual_pos; return 0;}
-                } {return 0;}
-            } else {*pos = actual_pos; return 0;}
-        } else {*pos = actual_pos}
+                                    if sino(pos,buffer,token, vec_error) == 1{  //  else
+                                        return 1;
+                                    }else{*pos = actual_pos;return 1;}
+                                }else{*pos = actual_pos;vec_error.push(error_if(buffer, pos))}
+                            }else{return 1;}
+                        } else {*pos = actual_pos;vec_error.push(error_if(buffer, pos));}
+                    } else {*pos = actual_pos; vec_error.push(error_if(buffer, pos));}
+                }else{vec_error.push(error_exp(buffer, pos));}
+            } else {*pos = actual_pos; vec_error.push(error_if(buffer, pos));}
+        } else {*pos = actual_pos;}
+        return 0
+    }
 
+fn sino(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>) -> i32{
+        let mut actual_pos = *pos;
+        if read(pos,buffer,token) == 18{  // else
+            actual_pos = *pos;
+            if read(pos,buffer,token) == 15{  // {
+                if sentencia(pos,buffer,token,vec_error) == 1{
+                    actual_pos = *pos;
+                    if read(pos,buffer,token) == 16{  //  }
+                        return 1;
+                    }else{*pos = actual_pos;vec_error.push(error_else(buffer, pos));}
+                }else{return 1;}
+            }else{*pos = actual_pos;vec_error.push(error_else(buffer, pos));}
+        }else{*pos = actual_pos;}
         return 0
     }
 
@@ -305,10 +367,9 @@ fn expresion(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
         if e(pos,buffer,token,vec_error) == 1{
-            if relacion(pos,buffer,token,vec_error) == 1{
+            if relacion(pos,buffer,token) == 1{
                 if e(pos,buffer,token,vec_error) == 1{
                     return 1;
                 }
@@ -320,9 +381,7 @@ fn expresion(
 fn relacion(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
-    token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    token: &mut String) -> i32{
         let actual_pos = *pos;
         if read(pos,buffer,token) == 13{  //  =
             if read(pos,buffer,token) == 13{  //  =
@@ -343,8 +402,7 @@ fn asig_list(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
         if asignacion(pos,buffer,token,vec_error) == 1{
             if asig_list(pos,buffer,token,vec_error) == 1{
                 return 1;
@@ -358,36 +416,28 @@ fn asignacion(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
         if varasig_list(pos,buffer,token,vec_error) == 1{
             let actual_pos = *pos;
             if read(pos,buffer,token) == 12{  // ;
                 return 1;
-            }
-            *pos = actual_pos;
+            } else{*pos = actual_pos; vec_error.push(error_dotcomma(buffer, pos)); return 1;}  //CAMBIADO PARA LEER ERRORES
         }
-        
         return 0
     }
-
 
 fn varasig_list(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
         if var_asig_ini(pos,buffer,token,vec_error) == 1{
             let actual_pos = *pos;
             if read(pos,buffer,token) == 11{  // ,
                 if varasig_list(pos,buffer,token,vec_error) == 1{
                     return 1;
                 }
-            }else{
-            *pos = actual_pos;
-            return 1;
-            }
+            }else{*pos = actual_pos; return 1;}
         }
         return 0
     }
@@ -396,15 +446,13 @@ fn var_asig_ini(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
         let actual_pos = *pos;
-        if read(pos,buffer,token) == 8{ // id
+        if read(pos,buffer,token) == 8 { // id
             if dec_asig(pos,buffer,token,vec_error) == 1{
                 return 1;
             }
-        }
-        *pos = actual_pos;
+        } else{*pos = actual_pos;}    // CAMBIADO PARA EJECUTARSE AUNQUE FALTE ID
         return 0
     }
 
@@ -412,29 +460,25 @@ fn dec_asig(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
         let actual_pos = *pos;
         if read(pos,buffer,token) == 13{ // =
             if e(pos,buffer,token,vec_error) == 1{
                 return 1;
-            }
-        }
-        *pos = actual_pos;
-        return 0
+            } else {vec_error.push(error_expression(buffer,pos));return 1;} //CAMBIADO PARA EJECUTARSE AUNQUE FALTE EXPRESION
+        }else {*pos = actual_pos;}
+        return 1
     }
 
 fn dec_list(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
         if dec(pos,buffer,token,vec_error) == 1{
             if dec_list(pos,buffer,token,vec_error) == 1{
                 return 1;
             }
-            return 1;
         }
         return 1
     }
@@ -443,15 +487,13 @@ fn dec(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)->   i32{
         if type_var(pos,buffer,token,vec_error) == 1{
             if vardec_list(pos,buffer,token,vec_error) == 1{
                 let actual_pos = *pos;
-                if read(pos,buffer,token) == 12{
+                if read(pos,buffer,token) == 12{  //;
                     return 1;
-                }
-                *pos = actual_pos;
+                }else{*pos = actual_pos; vec_error.push(error_dotcomma(buffer,pos)); return 1;}  // CAMBIADO PARA EJECUTARSE AUNQUE FALTE ;
             }
         }
         return 0
@@ -461,8 +503,7 @@ fn type_var(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
     let actual_pos = *pos;
     if read(pos,buffer,token) == 7{
         return 1;
@@ -476,6 +517,10 @@ fn type_var(
         return 1;
     }
     *pos = actual_pos;
+    if buffer[*pos as usize].val == "id"{
+        vec_error.push(error_type(buffer,pos));
+        return 1;
+    }
     return 0
     }
 
@@ -483,17 +528,14 @@ fn vardec_list(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
         if var_dec_ini(pos,buffer,token,vec_error) == 1{
             let actual_pos = *pos;
-            if read(pos,buffer,token) == 11{
+            if read(pos,buffer,token) == 11{  // ,
                 if vardec_list(pos,buffer,token,vec_error) == 1{
                     return 1;
                 }
-            }
-            *pos = actual_pos;
-            return 1;
+            }else{*pos = actual_pos; return 1;}
         }
         return 0
     }
@@ -502,15 +544,13 @@ fn var_dec_ini(
     pos: &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
         let actual_pos = *pos;
-        if read(pos,buffer,token) == 8{
+        if read(pos,buffer,token) == 8 || (buffer[*pos as usize].val == '='.to_string()) {  // id
             if asig(pos,buffer,token,vec_error) == 1{
                 return 1;
             }
-        }
-        *pos = actual_pos;
+        }else{*pos = actual_pos; vec_error.push(error_id(buffer,pos));return 1;}    // CAMBIADO PARA EJECUTARSE AUNQUE FALTE ID
         return 0
     }
 
@@ -518,15 +558,13 @@ fn asig(
     pos: &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
         let actual_pos = *pos;
-        if read(pos,buffer,token) == 13{
+        if read(pos,buffer,token) == 13{  // =
             if e(pos,buffer,token,vec_error) == 1{
                 return 1;
-            } else {return 0;}
-        }
-        *pos = actual_pos;
+            } else {vec_error.push(error_expression(buffer,pos));return 1;} //CAMBIADO PARA EJECUTARSE AUNQUE FALTE EXPRESION
+        } else{*pos = actual_pos;}
         return 1
     }
 
@@ -534,8 +572,7 @@ fn funcion(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
         if f_pow(pos,buffer,token,vec_error) == 1{
             return 1;
         }
@@ -549,8 +586,7 @@ fn f_pow(
     pos: &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
         let mut actual_pos = *pos;
         
         if read(pos,buffer,token) == 19{ // pow
@@ -564,10 +600,10 @@ fn f_pow(
                             if read(pos,buffer,token) == 6{ // )
                                 return 1;
                             } else{ *pos = actual_pos; return 0;}
-                        }else {return 0;}
-                    } else{ *pos = actual_pos; return 0;}
-                } else {return 0;}
-            } else{ *pos = actual_pos; return 0;}
+                        }else {vec_error.push(format!("Error in line: {}\n   Missing expression before {}",buffer[*pos as usize].ln,buffer[*pos as usize].word));return 0;}
+                    } else{ *pos = actual_pos; vec_error.push(format!("Error in line: {}\n   Missing ',' before {}",buffer[*pos as usize].ln,buffer[*pos as usize].word));return 0;}
+                } else {vec_error.push(format!("Error in line: {}\n   Missing expression before {}",buffer[*pos as usize].ln,buffer[*pos as usize].word));return 0;}
+            } else{ *pos = actual_pos; vec_error.push(format!("Error in line: {}\n   Missing '(' before {}",buffer[*pos as usize].ln,buffer[*pos as usize].word)); return 0;}
         }
         *pos = actual_pos;
         return 0
@@ -577,8 +613,7 @@ fn f_sqrt(
     pos: &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
         let mut actual_pos = *pos;
         if read(pos,buffer,token) == 20{ // sqrt
             actual_pos = *pos;
@@ -588,10 +623,9 @@ fn f_sqrt(
                     if read(pos,buffer,token) == 6{ // )
                         return 1;
                     } else{ *pos = actual_pos; return 0;}
-                }
-            } else{ *pos = actual_pos; return 0;}
-        }
-        *pos = actual_pos;
+                }else{vec_error.push(format!("Error in line: {}\n   Missing expression before {}",buffer[*pos as usize].ln,buffer[*pos as usize].word));}
+            } else{*pos = actual_pos;vec_error.push(format!("Error in line: {}\n   Missing '(' before {}",buffer[*pos as usize].ln,buffer[*pos as usize].word));}
+        }else{*pos = actual_pos}
         return 0
 }
 
@@ -599,8 +633,7 @@ fn ex(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
     let actual_pos = *pos;
     if read(pos,buffer,token) == 1{
         if t(pos,buffer,token,vec_error) == 1{
@@ -621,8 +654,7 @@ fn tx(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)-> i32{
     let actual_pos = *pos;
     if read(pos,buffer,token) == 3{
         if f(pos,buffer,token,vec_error) == 1{
@@ -643,14 +675,14 @@ fn f(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32 {
-    let actual_pos = *pos;
+    vec_error: &mut Vec<String>)-> i32 {
+    let mut actual_pos = *pos;
     if read(pos,buffer,token) == 5 { // (
       if e(pos,buffer,token,vec_error) == 1 {
+        actual_pos = *pos;
         if read(pos,buffer,token) == 6 { // )
           return 1
-        }
+        } else{*pos = actual_pos; vec_error.push(error_close_par(buffer, pos)); return 1;}  //CAMBIADO PARA QUE NO DE ERROR POR FALTA DE PARENTESIS
       }
     }
     *pos = actual_pos;
@@ -666,9 +698,14 @@ fn f(
       return 1
     }
     *pos = actual_pos;
+    if read(pos,buffer,token) == 10{ // char
+      return 1
+    }
+    *pos = actual_pos;
     if funcion(pos,buffer,token,vec_error) == 1{
         return 1
     }
+    //vec_error.push(format!("Error in line: {}  position: {}\n   Expected expression before {} token",buffer[*pos as usize].ln,buffer[*pos as usize].ps,buffer[*pos as usize].word));
     return 0
   }
 
@@ -676,8 +713,7 @@ fn f(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)->i32{
         if f(pos,buffer,token,vec_error) == 1 {
             return tx(pos,buffer,token,vec_error) 
           }
@@ -688,8 +724,7 @@ fn e(
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
     token: &mut String,
-    vec_error: &mut Vec<String>)->
-    i32{
+    vec_error: &mut Vec<String>)->i32{
         if t(pos,buffer,token,vec_error) == 1 {
             if ex(pos,buffer,token,vec_error) == 1 {
               return 1
@@ -701,8 +736,7 @@ fn e(
 fn read(    
     pos : &mut i32,
     buffer:&Vec<TokenVector>,
-    token: &mut String)-> 
-    i32{
+    token: &mut String)-> i32{
     //println!("word: {}", buffer[*pos as usize].val);
     if buffer[*pos as usize].val == "+"{
         *pos = *pos + 1;
@@ -766,7 +800,7 @@ fn read(
         return 15
     } else if buffer[*pos as usize].val == "}"{
         *pos = *pos + 1;
-        *token = "".to_string();
+        *token = "}".to_string();
         return 16
     } else if buffer[*pos as usize].val == "if"{
         *pos = *pos +1;

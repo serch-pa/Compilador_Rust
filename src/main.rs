@@ -5,12 +5,17 @@ fn main() {
     
     println!("\nEnter a string to validate:");
     let input: Vec<String> = read_lines("./src/text.txt");
-        if dynamic_dfa::validate(&input).is_empty() {
+    let validation = dynamic_dfa::validate(&input);
+        if validation.is_empty() {
             print!("\nValidation Result:");
             println!(" Valid equation");
         } else {
             print!("\nValidation Result:");
             println!(" Invalid equation");
+            for error in validation {
+                println!("{}", error);
+            }
+
         }
 }
 
