@@ -1,6 +1,13 @@
-int contador = 12;
-int main(){
-    char letra, caracter='a';
-    int suma = letra+caracter;
-    return 0;
+float amigos, hermanos = 13;
+int estudios;
+main(){
+    amigos = pow  (157,(hola+1075*(adios/1)));
+    familia=123.14
+    if (hola == 12){
+        extrano=(1241/146*(adios));
+        void = pow(hola,126573.14);
+    } else{
+        extrano = sqrt(135.215*2);
+    }
+    ami = sqrt(1756*(151));
 }

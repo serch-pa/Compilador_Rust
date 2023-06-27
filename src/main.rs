@@ -1,27 +1,17 @@
 mod dynamic_dfa;
-// use std::io;
 use std::fs::read_to_string;
-//use std::fs::File;
 
-// fn read_user_input() -> String {
-//     let mut input = String::new();
-//     io::stdin()
-//         .read_line(&mut input)
-//         .expect("Failed to read line");
-//     input.trim().to_string()
-// }
 fn main() {
     
     println!("\nEnter a string to validate:");
     let input: Vec<String> = read_lines("./src/text.txt");
-        if dynamic_dfa::validate(&input) == Ok(()) {
+        if dynamic_dfa::validate(&input).is_empty() {
             print!("\nValidation Result:");
             println!(" Valid equation");
         } else {
             print!("\nValidation Result:");
             println!(" Invalid equation");
         }
-        println!("\nEnter a string to validate:");
 }
 
 
@@ -35,7 +25,6 @@ fn read_lines(filename: &str) -> Vec<String> {
         .collect()  // gather them together into a vector
 }
 
-//falta agregar al autómata ingresar numeros negativos, con punto decimal ,caracteres y id's con numeros
 //funciones de gramatica
 //asignacion de valores a variables
 //creacion de tabla de tokens con su tipo y valor

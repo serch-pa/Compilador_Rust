@@ -3,15 +3,12 @@ use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::BufReader;
 
-#[derive(Debug)]
-
-struct TokenInTable {
-    type_token: String,
-    line: usize,
-    pos: usize,
-    value: String,
-}
-
+// struct TokenInTable {
+//     type_token: String,
+//     line: usize,
+//     pos: usize,
+//     value: String,
+// }
 struct TokenVector{
     val: String,
     word: String,
@@ -43,46 +40,24 @@ fn get_tokens(json: &Value) -> Vec<String> {
     tokens
 }
 
-// fn get_grammar_table()
-// -> HashMap<String, HashMap<String,String>>{
-//     let mut grammar_table: HashMap<String, HashMap<String,String>> = HashMap::new();
-//     let mut row: HashMap<String,String> = HashMap::new();
-// //  |                       id                         |                                     +                                          |                               *                                    |                                       (                                             |                                           )                                        |                                       $                                        |
-//     row.insert("i".to_string(),"XT".to_string());       row.insert("n".to_string(),"XT".to_string());       row.insert("+".to_string(),"Error: Expected 'id' before '+' token".to_string());  row.insert("-".to_string(),"Error: Expected 'id' before '-' token".to_string());  row.insert("*".to_string(),"Error: Expected 'id' before '*' token".to_string()); row.insert("/".to_string(),"Error: Expected 'id' before '/' token".to_string());       row.insert("(".to_string(),"XT".to_string());                                        row.insert(")".to_string(),"Error: missing '(' token or expression".to_string());    row.insert("$".to_string(),"Error: missing expressions".to_string());
-//     grammar_table.insert("E".to_string(),row);
-//     row = HashMap::new();
-//     row.insert("i".to_string(),"Error 1".to_string());  row.insert("n".to_string(),"Error 1".to_string());  row.insert("+".to_string(),"XT+".to_string());                                    row.insert("-".to_string(),"XT-".to_string());                                    row.insert("*".to_string(),"Error 6".to_string());                               row.insert("/".to_string(),"Error 6".to_string());                                     row.insert("(".to_string(),"Error 10".to_string());                                  row.insert(")".to_string(),"".to_string());                                          row.insert("$".to_string(),"".to_string());
-//     grammar_table.insert("X".to_string(),row);
-//     row = HashMap::new();
-//     row.insert("i".to_string(),"YF".to_string());       row.insert("n".to_string(),"YF".to_string());       row.insert("+".to_string(),"Error: double '+' token".to_string());                row.insert("-".to_string(),"Error: double '-' token".to_string());                row.insert("*".to_string(),"Error 7".to_string());                               row.insert("/".to_string(),"Error 7".to_string());                                     row.insert("(".to_string(),"YF".to_string());                                        row.insert(")".to_string(),"Error: remaining ')' after '+' token".to_string());      row.insert("$".to_string(),"Error: Expected 'id' after '+' or '-' token".to_string());
-//     grammar_table.insert("T".to_string(),row);
-//     row = HashMap::new();
-//     row.insert("i".to_string(),"Error 2".to_string());  row.insert("n".to_string(),"Error 2".to_string());  row.insert("+".to_string(),"".to_string());                                       row.insert("-".to_string(),"".to_string());                                       row.insert("*".to_string(),"YF*".to_string());                                   row.insert("/".to_string(),"YF/".to_string());                                         row.insert("(".to_string(),"Error: missing operator before '(' token".to_string());  row.insert(")".to_string(),"".to_string());                                          row.insert("$".to_string(),"".to_string());
-//     grammar_table.insert("Y".to_string(),row);
-//     row = HashMap::new();
-//     row.insert("i".to_string(),"i".to_string());        row.insert("n".to_string(),"n".to_string());        row.insert("+".to_string(),"Error 4".to_string());                                row.insert("-".to_string(),"Error 20".to_string());                               row.insert("*".to_string(),"Error: double '*' token".to_string());               row.insert("/".to_string(),"Error: double '/' token".to_string());                     row.insert("(".to_string(),")E(".to_string());                                       row.insert(")".to_string(),"Error: remaining ')' after '*' token".to_string());      row.insert("$".to_string(),"Error: Expected 'id' after '*' or '/' token".to_string());
-//     grammar_table.insert("F".to_string(),row);
-//     grammar_table
-// }
+fn get_reserved_words(json: &Value) -> HashMap<String, Vec<String>> {
+    let mut reserved_words: &Vec<Value> = json["reserved"]["type"].as_array().unwrap();
 
-// fn get_reserved_words(json: &Value) -> HashMap<String, Vec<String>> {
-//     let mut reserved_words: &Vec<Value> = json["reserved"]["type"].as_array().unwrap();
+    let mut reserved: HashMap<String, Vec<String>> = HashMap::new();
+    let mut words: Vec<String> = Vec::new();
 
-//     let mut reserved: HashMap<String, Vec<String>> = HashMap::new();
-//     let mut words: Vec<String> = Vec::new();
-
-//     for word in reserved_words {
-//         words.push(word.as_str().unwrap().to_string());
-//     }
-//     reserved.insert("type".to_string(), words);
-//     reserved_words= json["reserved"]["words"].as_array().unwrap();
-//     words = Vec::new();
-//     for word in reserved_words {
-//         words.push(word.as_str().unwrap().to_string());
-//     }
-//     reserved.insert("words".to_string(), words);
-//     reserved
-// }
+    for word in reserved_words {
+        words.push(word.as_str().unwrap().to_string());
+    }
+    reserved.insert("type".to_string(), words);
+    reserved_words= json["reserved"]["words"].as_array().unwrap();
+    words = Vec::new();
+    for word in reserved_words {
+        words.push(word.as_str().unwrap().to_string());
+    }
+    reserved.insert("words".to_string(), words);
+    reserved
+}
 
 fn get_transitions(
     json: &Value,
@@ -130,147 +105,691 @@ fn get_accepted_states(json: &Value) -> HashSet<String> {
     accepted_states
 }
 
-// fn get_input_token_array(s: &String, tokens: &Vec<String>) -> Result<Vec<String>, ()> {
-//     let mut input_token_array: Vec<String> = Vec::new();
-//     let mut current_token = String::new();
-
-//         for char in s.chars() {
-//                 if current_token != "" {
-//                     input_token_array.push(current_token);
-//                     current_token = String::new();
-//                 }
-//             current_token.push(char);
-//             if tokens.contains(&current_token) {
-//                 input_token_array.push(current_token);
-//                 current_token = String::new();
-//             } else {
-//                 current_token.push(char);
-//             }
-//         }
-
-//     if current_token == "" {
-//         Ok(input_token_array)
-//     } else {
-//         println!("\n Symbol '{}' is not in the language or expected number before '.'", current_token);
-//         Err(())
-//     }
-// }
-
 fn analyze_input(
     input_token_array: &Vec<String>,
+    reserved_words: &HashMap<String, Vec<String>>,
     dfa: &HashMap<String, HashMap<String, String>>,
     initial_state: &String,
     accepted_states: &HashSet<String>
-) ->    Vec<TokenVector> 
-{
+) ->    Vec<TokenVector> {
 
     let mut current_state = initial_state.to_string();
     let mut buffer = String::new();
-    //let mut token: TokenVector;
-    //let mut token_table = HashMap::<String,Token>::new();
     let mut data = Vec::<TokenVector>::new();
 
 
     for (line, lines) in input_token_array.iter().enumerate() {
+        println!("{}", lines);
         for (position, chars) in lines.chars().enumerate() {
             let next_state = &dfa[&current_state][&chars.to_string()];
                 if (!accepted_states.contains(next_state) ||  !accepted_states.contains(&current_state)) && !buffer.is_empty(){ 
                     if !current_state.eq("error"){
-                        if !buffer.contains(" "){
-                            let token_struct = TokenVector{
-                                val: current_state.to_string(),
+                        if !buffer.contains(" ") && !buffer.contains("\n"){
+                            let mut token_struct = TokenVector{
+                                val: "".to_string(),
                                 word: buffer.to_string(),
-                                ln: line,
+                                ln: line+1,
                                 ps: position,
                             };
-                            // let token_struct = Token{
-                            //     type_token: current_state.to_string(),
-                            //     line: 0,
-                            //     pos: position,
-                            //     value: "".to_string(),
-                            // };
-                            // //println!("token: {}     token_name: {}", buffer, current_state);
-                            // token_table.insert(buffer.to_string(),token_struct);
+                            if !reserved_words["type"].contains(&buffer) && !reserved_words["words"].contains(&buffer){
+                                token_struct.val = current_state.to_string();
+                            } else{
+                                token_struct.val = buffer.to_string();
+                            }
+
                             data.push(token_struct);
                         }
                     }else{
-                        println!("Error in token: {} in position {}", buffer, position);
+                        println!("Error:{}:{}    in token: {}", line, position, buffer);
                     }
                     buffer = String::new();
                 }
                 buffer.push_str(chars.to_string().as_str());
                 current_state = next_state.to_string();
         }
+        if !current_state.eq("error"){
+            let token_struct= TokenVector{
+                val: current_state.to_string(),
+                word: buffer.to_string(),
+                ln: line+1,
+                ps: input_token_array[line].len(),
+            };
+            data.push(token_struct);
+        }
+        buffer = String::new();
+        current_state = initial_state.to_string();
     }
-    if !current_state.eq("error"){
-        let token_struct= TokenVector{
-            val: current_state.to_string(),
-            word: buffer.to_string(),
-            ln: input_token_array.len(),
-            ps: input_token_array[input_token_array.len()-1].len(),
-        };
-        //println!("token: {}     token_name: {}", buffer, current_state);
-        data.push(token_struct);
-    }
+    data.push(TokenVector{
+        val: "$".to_string(),
+        word: "$".to_string(),
+        ln: 0,
+        ps: 0,
+    });
     data
 
 }
 
-// fn grammar_check(
-//     buffer: &Vec<String>,
-//     grammar_table: &HashMap<String, HashMap<String,String>>
-// ) -> Result<(), ()>{
-//     let mut pila = Vec::<String>::new();
-//     let mut index = 0;
-//     let terminal = vec!["+".to_string(),"*".to_string(),"(".to_string(),")".to_string(),"i".to_string(), "$".to_string(), "-".to_string(), "/".to_string(), "n".to_string()];
-//     pila.push("$".to_string());
-//     pila.push("E".to_string());
-
-//     while !(pila.is_empty()){
-//         let top = pila.pop().unwrap();
-//         let token = &buffer[index];
-//         //println!("top: {}     token: {}    pila: {:?}     ", top, token, pila);
-//         if terminal.contains(&top) {
-//             if top.eq(token){
-//                 index = index + 1;
-//             } else{
-//                 println!("Error: missing ')' or '(' token or expression");
-//                 return Err(());
-//             }
-//         } else{
-//             let action = &grammar_table[&top][token]; 
-//             if action.contains("Error"){
-//                 println!("{}",action);
-//                 return Err(());
-//             }else{
-//                 for chars in action.chars(){
-//                     pila.push(chars.to_string());
-//                 }
-//             }
-//         }
-//     }
-//     Ok(())
-// }
-
-pub fn validate(exp: &Vec<String>) -> Result<(), ()> {
+pub fn validate(exp: &Vec<String>) -> Vec<String> {
     let json = get_json();
     let states = get_states(&json);
     let tokens = get_tokens(&json);
-    //let reserved_words = get_reserved_words(&json);
+    let reserved_words = get_reserved_words(&json);
     //println!("Reserved words: {:?}", reserved_words);
     let accepted_states: HashSet<String> = get_accepted_states(&json);
     let dfa = get_transitions(&json, &states, &tokens);
     let initial_state = json["initial_state"].as_str().unwrap().to_string();
-    //let grammar_table = get_grammar_table();
-    //let input_token_array: Vec<String> = get_input_token_array(exp, &tokens)?;
-    //println!("\n\nInput token array: {:?} \n\n",input_token_array);
-    let array_input_tokens = analyze_input(exp, &dfa, &initial_state, &accepted_states);
-    //let token_vector:Vec<String> = tuple_analyze.1;
-    //let token_table:HashMap<String,Token> = tuple_analyze.0;
-    for tokens in &array_input_tokens{
-        println!("token: {}        token_val: {}    token_line: {}    token_pos: {}", tokens.word, tokens.val, tokens.ln, tokens.ps);
-    }
+    let array_input_tokens = analyze_input(exp, &reserved_words, &dfa, &initial_state, &accepted_states);
+    // for tokens in &array_input_tokens{
+    //     println!("token: {}        token_val: {}    token_line: {}    token_pos: {}", tokens.word, tokens.val, tokens.ln, tokens.ps);
+    // }
     //println!("{:?}", token_table);
-    //grammar_check(&token_vector,&grammar_table)?;
-    return Ok(());
+    grammar_check(&array_input_tokens)
 }
+
+
+fn grammar_check(buffer: &Vec<TokenVector>) -> Vec<String>{
+    let mut token: String = "".to_string();
+    let mut pos = 0;
+    let mut vec_error:Vec<String> = Vec::new(); //Vector de errores
+
+    program(&mut pos,&buffer,&mut token, &mut vec_error);
+    vec_error
+}
+
+fn program(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        if dec_list(pos,buffer,token,vec_error) == 1{
+            if inicio(pos,buffer,token,vec_error) == 1{
+                return 1;
+            }
+        }
+        return 0
+    }
+
+fn inicio(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        let mut actual_pos = *pos;
+        if read(pos,buffer,token) == 14{ // main
+            actual_pos = *pos;
+            if read(pos,buffer,token) == 5{ // (
+                actual_pos = *pos;
+                if read(pos,buffer,token) == 6{  //  )
+                    actual_pos = *pos;
+                    if read(pos,buffer,token) == 15{  //  {
+                        if sentencia(pos,buffer,token,vec_error) == 1{ 
+                            actual_pos = *pos;
+                            if read(pos,buffer,token) == 16{  //  }
+                                return 1;
+                            }else{*pos = actual_pos; return 0;}
+                        }
+                    }else{*pos = actual_pos; return 0;}
+                }else{*pos = actual_pos; return 0;}
+            }else{*pos = actual_pos; return 0;}
+        }
+        *pos = actual_pos;
+        return 0
+    }
+
+fn sentencia(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        //println!("buffer: {} line: {}", buffer[*pos as usize].word, buffer[*pos as usize].ln);
+        if asig_list(pos,buffer,token,vec_error) == 1{
+            if sentencia(pos, buffer, token, vec_error) == 1{
+                return 1;
+            }
+        }
+        //println!("buffer: {} line: {} ", buffer[*pos as usize].word, buffer[*pos as usize].ln);
+        if condicion(pos,buffer,token,vec_error) == 1{
+            if sentencia(pos, buffer, token, vec_error) == 1{
+                return 1;
+            }
+        }
+        return 1
+    }
+
+fn condicion(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        let mut actual_pos = *pos;
+        if read(pos,buffer,token) == 17{  // if
+            actual_pos = *pos;
+            if read(pos,buffer,token) == 5{  // (
+                if expresion(pos,buffer,token,vec_error) == 1{
+                    actual_pos = *pos;
+                    if read(pos,buffer,token) == 6{  // )
+                        actual_pos = *pos;
+                        if read(pos,buffer,token) == 15{  // {
+                            //println!("buffer: {} line: {}", buffer[*pos as usize].word, buffer[*pos as usize].ln);
+                            if sentencia(pos,buffer,token,vec_error) == 1{
+                                actual_pos = *pos;
+                                if read(pos,buffer,token) == 16{  //  }
+                                    actual_pos = *pos;
+                                    if read(pos,buffer,token) == 18{  //  else
+                                        actual_pos = *pos;
+                                        if read(pos,buffer,token) == 15{  //  {
+                                            if sentencia(pos,buffer,token,vec_error) == 1{
+                                                actual_pos = *pos;
+                                                if read(pos,buffer,token) == 16{  //  }
+                                                    return 1;
+                                                }else{*pos = actual_pos; return 0;}
+                                            }else{*pos = actual_pos; return 0;}
+                                        }else{*pos = actual_pos; return 0;}
+                                    }else{*pos = actual_pos; return 1;}
+                                }else{*pos = actual_pos; return 0;}
+                            } {return 0;}
+                        } else {*pos = actual_pos; return 0;}
+                    } else {*pos = actual_pos; return 0;}
+                } {return 0;}
+            } else {*pos = actual_pos; return 0;}
+        } else {*pos = actual_pos}
+
+        return 0
+    }
+
+fn expresion(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        if e(pos,buffer,token,vec_error) == 1{
+            if relacion(pos,buffer,token,vec_error) == 1{
+                if e(pos,buffer,token,vec_error) == 1{
+                    return 1;
+                }
+            }
+        }
+        return 0
+    }
+
+fn relacion(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        let actual_pos = *pos;
+        if read(pos,buffer,token) == 13{  //  =
+            if read(pos,buffer,token) == 13{  //  =
+                return 1;
+            }
+        }
+        *pos = actual_pos;
+        if read(pos,buffer,token) == 21{  //  !
+            if read(pos,buffer,token) == 13{  //  =
+                return 1;
+            }
+        }
+        *pos = actual_pos;
+        return 0
+    }
+
+fn asig_list(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        if asignacion(pos,buffer,token,vec_error) == 1{
+            if asig_list(pos,buffer,token,vec_error) == 1{
+                return 1;
+            }
+            return 1;
+        }
+        return 0
+    }
+
+fn asignacion(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        if varasig_list(pos,buffer,token,vec_error) == 1{
+            let actual_pos = *pos;
+            if read(pos,buffer,token) == 12{  // ;
+                return 1;
+            }
+            *pos = actual_pos;
+        }
+        
+        return 0
+    }
+
+
+fn varasig_list(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        if var_asig_ini(pos,buffer,token,vec_error) == 1{
+            let actual_pos = *pos;
+            if read(pos,buffer,token) == 11{  // ,
+                if varasig_list(pos,buffer,token,vec_error) == 1{
+                    return 1;
+                }
+            }else{
+            *pos = actual_pos;
+            return 1;
+            }
+        }
+        return 0
+    }
+
+fn var_asig_ini(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        let actual_pos = *pos;
+        if read(pos,buffer,token) == 8{ // id
+            if dec_asig(pos,buffer,token,vec_error) == 1{
+                return 1;
+            }
+        }
+        *pos = actual_pos;
+        return 0
+    }
+
+fn dec_asig(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        let actual_pos = *pos;
+        if read(pos,buffer,token) == 13{ // =
+            if e(pos,buffer,token,vec_error) == 1{
+                return 1;
+            }
+        }
+        *pos = actual_pos;
+        return 0
+    }
+
+fn dec_list(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        if dec(pos,buffer,token,vec_error) == 1{
+            if dec_list(pos,buffer,token,vec_error) == 1{
+                return 1;
+            }
+            return 1;
+        }
+        return 1
+    }
+
+fn dec(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        if type_var(pos,buffer,token,vec_error) == 1{
+            if vardec_list(pos,buffer,token,vec_error) == 1{
+                let actual_pos = *pos;
+                if read(pos,buffer,token) == 12{
+                    return 1;
+                }
+                *pos = actual_pos;
+            }
+        }
+        return 0
+    }
+
+fn type_var(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+    let actual_pos = *pos;
+    if read(pos,buffer,token) == 7{
+        return 1;
+    }
+    *pos = actual_pos;
+    if read(pos,buffer,token) == 9{
+        return 1;
+    }
+    *pos = actual_pos;
+    if read(pos,buffer,token) == 10{
+        return 1;
+    }
+    *pos = actual_pos;
+    return 0
+    }
+
+fn vardec_list(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        if var_dec_ini(pos,buffer,token,vec_error) == 1{
+            let actual_pos = *pos;
+            if read(pos,buffer,token) == 11{
+                if vardec_list(pos,buffer,token,vec_error) == 1{
+                    return 1;
+                }
+            }
+            *pos = actual_pos;
+            return 1;
+        }
+        return 0
+    }
+
+fn var_dec_ini(
+    pos: &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        let actual_pos = *pos;
+        if read(pos,buffer,token) == 8{
+            if asig(pos,buffer,token,vec_error) == 1{
+                return 1;
+            }
+        }
+        *pos = actual_pos;
+        return 0
+    }
+
+fn asig(
+    pos: &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        let actual_pos = *pos;
+        if read(pos,buffer,token) == 13{
+            if e(pos,buffer,token,vec_error) == 1{
+                return 1;
+            } else {return 0;}
+        }
+        *pos = actual_pos;
+        return 1
+    }
+
+fn funcion(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        if f_pow(pos,buffer,token,vec_error) == 1{
+            return 1;
+        }
+        if f_sqrt(pos,buffer,token,vec_error) == 1{
+            return 1;
+        }
+        return 0
+    }
+
+fn f_pow(
+    pos: &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        let mut actual_pos = *pos;
+        
+        if read(pos,buffer,token) == 19{ // pow
+            actual_pos = *pos;
+            if read(pos,buffer,token) == 5{ // (
+                if e(pos,buffer,token,vec_error) == 1{
+                    actual_pos = *pos;
+                    if read(pos,buffer,token) == 11{ // ,
+                        if e(pos,buffer,token,vec_error) == 1{
+                            actual_pos = *pos;
+                            if read(pos,buffer,token) == 6{ // )
+                                return 1;
+                            } else{ *pos = actual_pos; return 0;}
+                        }else {return 0;}
+                    } else{ *pos = actual_pos; return 0;}
+                } else {return 0;}
+            } else{ *pos = actual_pos; return 0;}
+        }
+        *pos = actual_pos;
+        return 0
+    }
+
+fn f_sqrt(
+    pos: &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        let mut actual_pos = *pos;
+        if read(pos,buffer,token) == 20{ // sqrt
+            actual_pos = *pos;
+            if read(pos,buffer,token) == 5{ // (
+                if e(pos,buffer,token,vec_error) == 1{
+                    actual_pos = *pos;
+                    if read(pos,buffer,token) == 6{ // )
+                        return 1;
+                    } else{ *pos = actual_pos; return 0;}
+                }
+            } else{ *pos = actual_pos; return 0;}
+        }
+        *pos = actual_pos;
+        return 0
+}
+
+fn ex(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+    let actual_pos = *pos;
+    if read(pos,buffer,token) == 1{
+        if t(pos,buffer,token,vec_error) == 1{
+            return ex(pos,buffer,token,vec_error)
+        } else {return 0}
+    }
+    *pos = actual_pos;
+    if read(pos,buffer,token) == 2{
+        if t(pos,buffer,token,vec_error) == 1{
+            return ex(pos,buffer,token,vec_error)
+        } else {return 0}
+    }
+    *pos = actual_pos;
+    return 1
+}
+
+fn tx(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+    let actual_pos = *pos;
+    if read(pos,buffer,token) == 3{
+        if f(pos,buffer,token,vec_error) == 1{
+            return tx(pos,buffer,token,vec_error)
+        } else {return 0}
+    }
+    *pos = actual_pos;
+    if read(pos,buffer,token) == 4{
+        if f(pos,buffer,token,vec_error) == 1{
+            return tx(pos,buffer,token,vec_error)
+        } else {return 0}
+    }
+    *pos = actual_pos;
+    return 1
+}
+
+fn f(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32 {
+    let actual_pos = *pos;
+    if read(pos,buffer,token) == 5 { // (
+      if e(pos,buffer,token,vec_error) == 1 {
+        if read(pos,buffer,token) == 6 { // )
+          return 1
+        }
+      }
+    }
+    *pos = actual_pos;
+    if read(pos,buffer,token) == 7 { // int
+      return 1
+    }
+    *pos = actual_pos;
+    if read(pos,buffer,token) == 8{ // float
+      return 1
+    }
+    *pos = actual_pos;
+    if read(pos,buffer,token) == 9{ // id
+      return 1
+    }
+    *pos = actual_pos;
+    if funcion(pos,buffer,token,vec_error) == 1{
+        return 1
+    }
+    return 0
+  }
+
+  fn t(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        if f(pos,buffer,token,vec_error) == 1 {
+            return tx(pos,buffer,token,vec_error) 
+          }
+    return 0
+    }
+
+fn e(
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String,
+    vec_error: &mut Vec<String>)->
+    i32{
+        if t(pos,buffer,token,vec_error) == 1 {
+            if ex(pos,buffer,token,vec_error) == 1 {
+              return 1
+            }
+          }
+        return 0
+    }
+
+fn read(    
+    pos : &mut i32,
+    buffer:&Vec<TokenVector>,
+    token: &mut String)-> 
+    i32{
+    //println!("word: {}", buffer[*pos as usize].val);
+    if buffer[*pos as usize].val == "+"{
+        *pos = *pos + 1;
+        *token = "+".to_string();
+        return 1
+    }else if buffer[*pos as usize].val == "-"{
+        *pos = *pos + 1;
+        *token = "-".to_string();
+        return 2
+    }else if buffer[*pos as usize].val == "/"{
+        *pos = *pos + 1;
+        *token = "/".to_string();
+        return 3
+    }else  if buffer[*pos as usize].val == "*"{
+        *pos = *pos + 1;
+        *token = "*".to_string();
+        return 4
+    } else if buffer[*pos as usize].val == "("{
+        *pos = *pos + 1;
+        *token = "(".to_string();
+        return 5
+    } else if buffer[*pos as usize].val == ")"{
+        *pos = *pos + 1;
+        *token = ")".to_string();
+        return 6
+    } else if buffer[*pos as usize].val == "int"{
+        *pos = *pos + 1;
+        *token = "int".to_string();
+        return 7
+    } else if buffer[*pos as usize].val == "id"{
+        *pos = *pos + 1;
+        *token = "id".to_string();
+        return 8
+    } else if buffer[*pos as usize].val == "float"{
+        *pos = *pos + 1;
+        *token = "float".to_string();
+        return 9
+    } else if buffer[*pos as usize].val == "char"{
+        *pos = *pos + 1;
+        *token = "char".to_string();
+        return 10
+    } else if buffer[*pos as usize].val == ","{
+        *pos = *pos + 1;
+        *token = ",".to_string();
+        return 11
+    } else if buffer[*pos as usize].val == ";"{
+        *pos = *pos + 1;
+        *token = ";".to_string();
+        return 12
+    } else if buffer[*pos as usize].val == "="{
+        *pos = *pos + 1;
+        *token = "=".to_string();
+        return 13
+    } else if buffer[*pos as usize].val == "main"{
+        *pos = *pos + 1;
+        *token = "main".to_string();
+        return 14 
+    } else if buffer[*pos as usize].val == "{"{
+        *pos = *pos + 1;
+        *token = "{".to_string();
+        return 15
+    } else if buffer[*pos as usize].val == "}"{
+        *pos = *pos + 1;
+        *token = "".to_string();
+        return 16
+    } else if buffer[*pos as usize].val == "if"{
+        *pos = *pos +1;
+        *token = "if".to_string();
+        return 17
+    } else if buffer[*pos as usize].val == "else"{
+        *pos = *pos +1;
+        *token = "else".to_string();
+        return 18
+    } else if buffer[*pos as usize].val == "pow"{
+        *pos = *pos +1;
+        *token = "pow".to_string();
+        return 19
+    } else if buffer[*pos as usize].val == "sqrt"{
+        *pos = *pos +1;
+        *token = "sqrt".to_string();
+        return 20
+    } else if buffer[*pos as usize].val == "!"{
+        *pos = *pos +1;
+        *token = "!".to_string();
+        return 21
+    }
+
+    *token = "".to_string();
+    return 0
+}  
