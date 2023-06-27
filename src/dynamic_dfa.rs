@@ -59,6 +59,12 @@ fn error_else(
     pos: &mut i32, )-> String{
     return format!("Error in line: {}\n   Missing or wrong 'else' statement",buffer[(*pos-1) as usize].ln)}
 
+fn error_open_par(
+    buffer: &Vec<TokenVector>,
+    pos: &mut i32, )-> String{
+    return format!("Error in line: {}\n   Missing '(' after {} token",buffer[(*pos-1) as usize].ln, buffer[(*pos-1) as usize].word)
+}
+
 // struct TokenInTable {
 //     type_token: String,
 //     line: usize,
@@ -600,10 +606,10 @@ fn f_pow(
                             if read(pos,buffer,token) == 6{ // )
                                 return 1;
                             } else{ *pos = actual_pos; return 0;}
-                        }else {vec_error.push(format!("Error in line: {}\n   Missing expression before {}",buffer[*pos as usize].ln,buffer[*pos as usize].word));return 0;}
-                    } else{ *pos = actual_pos; vec_error.push(format!("Error in line: {}\n   Missing ',' before {}",buffer[*pos as usize].ln,buffer[*pos as usize].word));return 0;}
-                } else {vec_error.push(format!("Error in line: {}\n   Missing expression before {}",buffer[*pos as usize].ln,buffer[*pos as usize].word));return 0;}
-            } else{ *pos = actual_pos; vec_error.push(format!("Error in line: {}\n   Missing '(' before {}",buffer[*pos as usize].ln,buffer[*pos as usize].word)); return 0;}
+                        }else {return 0;}
+                    } else{ *pos = actual_pos;return 0;}
+                } else {return 0;}
+            } else{ *pos = actual_pos;vec_error.push(error_open_par(buffer, pos));return 0;}
         }
         *pos = actual_pos;
         return 0
@@ -624,7 +630,7 @@ fn f_sqrt(
                         return 1;
                     } else{ *pos = actual_pos; return 0;}
                 }else{vec_error.push(format!("Error in line: {}\n   Missing expression before {}",buffer[*pos as usize].ln,buffer[*pos as usize].word));}
-            } else{*pos = actual_pos;vec_error.push(format!("Error in line: {}\n   Missing '(' before {}",buffer[*pos as usize].ln,buffer[*pos as usize].word));}
+            } else{*pos = actual_pos;vec_error.push(error_open_par(buffer,pos));}
         }else{*pos = actual_pos}
         return 0
 }

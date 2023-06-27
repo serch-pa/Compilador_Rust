@@ -5,9 +5,9 @@ int a,b;
 main(){
     hermano, hola =11;
     hola = (martinez*1);
-    if (hola != sqrt(1)){
+    if (hola != sqrt (11*1)){
         hola = 1;
-        benito = 1534*pow(1,1);
+        benito = 1534*pow(101,1);
     } else{
         amigo,best='b';
         amigo;}
